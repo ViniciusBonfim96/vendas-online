@@ -26,6 +26,7 @@ export class UserService {
 
     const createdUser = this.userRepository.create({
       ...createUserDto,
+      type_user: 1,
       password: passwordHash,
     });
 
