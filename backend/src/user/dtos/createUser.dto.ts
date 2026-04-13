@@ -5,7 +5,6 @@ import {
   PasswordField,
   PhoneField,
 } from '@/common/validation';
-import { IsString } from 'class-validator';
 
 export class CreateUserDto {
   @NameField()
@@ -17,7 +16,6 @@ export class CreateUserDto {
   @PhoneField()
   phone?: string;
 
-  @IsString()
   @CPFField()
   cpf!: string;
 
