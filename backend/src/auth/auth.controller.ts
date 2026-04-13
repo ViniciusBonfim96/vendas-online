@@ -1,4 +1,3 @@
-import { ReturnUserDto } from '@/user/dtos/returnUser.dto';
 import {
   Body,
   Controller,
@@ -8,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { LoginDto } from '@/auth/dto/login.dto';
 import { AuthService } from '@/auth/auth.service';
+import { ReturnLoginDto } from '@/auth/dto/returnLogin.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -15,9 +15,7 @@ export class AuthController {
 
   @UsePipes(ValidationPipe)
   @Post()
-  async signIn(@Body() loginDto: LoginDto): Promise<ReturnUserDto> {
-    const user = await this.authService.singIn(loginDto);
-
-    return new ReturnUserDto(user);
+  async signIn(@Body() loginDto: LoginDto): Promise<ReturnLoginDto> {
+    return this.authService.singIn(loginDto);
   }
 }
