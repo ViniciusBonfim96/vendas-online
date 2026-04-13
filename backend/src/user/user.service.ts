@@ -40,15 +40,11 @@ export class UserService {
     return await this.userRepository.save(createdUser);
   }
 
-  async getAllUser(): Promise<ReturnUserDto[]> {
-    const users = await this.userRepository.find();
-
-    const returnUserDto = users.map((users) => new ReturnUserDto(users));
-
-    return returnUserDto;
+  async getAllUser(): Promise<UserEntity[]> {
+    return this.userRepository.find();
   }
 
-  async findUserById(userId: number): Promise<ReturnUserDto> {
+  async findUserById(userId: number): Promise<UserEntity> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
     });
@@ -57,6 +53,21 @@ export class UserService {
       throw new NotFoundException(`UserId: ${userId} not found`);
     }
 
-    return new ReturnUserDto(user);
+    return user;
+  }
+
+  async getUserByIdUsingRelations(userId: number): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+      relations: ['addresses'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 }

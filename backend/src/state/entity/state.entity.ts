@@ -1,7 +1,9 @@
+import { CityEntity } from '@/city/entity/city.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -29,4 +31,7 @@ export class StateEntity {
     default: () => 'CURRENT_TIMESTAMP',
   })
   updated_at!: Date;
+
+  @OneToMany(() => CityEntity, (city) => city.state)
+  cities?: CityEntity[];
 }

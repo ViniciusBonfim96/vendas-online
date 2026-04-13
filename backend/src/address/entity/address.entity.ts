@@ -1,7 +1,11 @@
+import { CityEntity } from '@/city/entity/city.entity';
+import { UserEntity } from '@/user/entity/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -14,8 +18,8 @@ export class AddressEntity {
   @Column({ name: 'user_id', type: 'integer', nullable: false })
   userId!: number;
 
-  @Column({ name: 'complement', type: 'varchar', length: 255, nullable: true })
-  complement?: string;
+  @Column({ name: 'complement', type: 'varchar', length: 255, nullable: false })
+  complement!: string;
 
   @Column({ name: 'number', type: 'integer', nullable: false })
   numberAddress!: number;
@@ -41,4 +45,12 @@ export class AddressEntity {
     default: () => 'CURRENT_TIMESTAMP',
   })
   updated_at!: Date;
+
+  @ManyToOne(() => UserEntity, (user) => user.addresses)
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  user?: UserEntity;
+
+  @ManyToOne(() => CityEntity, (city) => city.addresses)
+  @JoinColumn({ name: 'city_id', referencedColumnName: 'id' })
+  city?: CityEntity;
 }
