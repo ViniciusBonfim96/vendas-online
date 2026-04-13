@@ -7,12 +7,12 @@ import {
 } from 'typeorm';
 
 @Entity({ name: 'address' })
-export class addressEntity {
+export class AddressEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
   @Column({ name: 'user_id', type: 'integer', nullable: false })
-  user_id!: number;
+  userId!: number;
 
   @Column({ name: 'complement', type: 'varchar', length: 255, nullable: true })
   complement?: string;
@@ -24,7 +24,7 @@ export class addressEntity {
   cep!: string;
 
   @Column({ name: 'city_id', type: 'integer', nullable: false })
-  city_id!: number;
+  cityId!: number;
 
   @CreateDateColumn({
     name: 'created_at',

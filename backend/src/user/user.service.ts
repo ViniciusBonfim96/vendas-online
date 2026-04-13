@@ -10,6 +10,7 @@ import { CreateUserDto } from './dtos/createUser.dto';
 import { hash } from 'bcrypt';
 import { error } from 'console';
 import { handleDatabaseError } from '@/common/validation/util/database.error';
+import { ReturnUserDto } from './dtos/returnUser.dto';
 
 @Injectable()
 export class UserService {
@@ -37,7 +38,11 @@ export class UserService {
     }
   }
 
-  async getAllUser(): Promise<UserEntity[]> {
-    return this.userRepository.find();
+  async getAllUser(): Promise<ReturnUserDto[]> {
+    const users = await this.userRepository.find();
+
+    const usersDto = users.map((users) => new ReturnUserDto(users));
+
+    return usersDto;
   }
 }

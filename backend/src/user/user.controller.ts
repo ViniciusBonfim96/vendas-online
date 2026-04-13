@@ -8,12 +8,9 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
   @Get()
   async getAllUsers(): Promise<ReturnUserDto[]> {
-    const users = await this.userService.getAllUser();
-
-    const userDto = users.map((users) => new ReturnUserDto(users));
-
-    return userDto;
+    return this.userService.getAllUser();
   }
+
   @Post()
   async createUser(@Body() createUserDto: CreateUserDto) {
     return this.userService.createUser(createUserDto);

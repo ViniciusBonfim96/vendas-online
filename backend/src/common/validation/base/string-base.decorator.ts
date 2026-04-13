@@ -2,6 +2,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -26,7 +27,14 @@ export const BaseString = ({
   toLowerCase = false,
   optional = false,
 }: StringOptions = {}) => {
-  const decorators = [IsString(), MinLength(min), MaxLength(max)];
+  const decorators = [
+    IsString(),
+    MinLength(min),
+    MaxLength(max),
+    Matches(/^(?!.*\s{2,}).*$/, {
+      message: 'Nome não pode conter espaços duplicados',
+    }),
+  ];
 
   if (!optional) decorators.unshift(IsNotEmpty());
   if (optional) decorators.unshift(IsOptional());
