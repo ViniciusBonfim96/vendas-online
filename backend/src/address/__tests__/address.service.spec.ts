@@ -7,6 +7,7 @@ import { UserService } from '@/user/user.service';
 import { CityService } from '@/city/city.service';
 import { addressEntityMock } from '../__mocks__/address.mock';
 import { createAddressMock } from '../__mocks__/create-address.mock';
+import { userEntityMock } from '@/user/__mocks__/user.mock';
 
 describe('AddressService', () => {
   let service: AddressService;
@@ -20,7 +21,10 @@ describe('AddressService', () => {
         AddressService,
         {
           provide: getRepositoryToken(AddressEntity),
-          useValue: { save: jest.fn().mockResolvedValue(addressEntityMock) },
+          useValue: {
+            save: jest.fn().mockResolvedValue(addressEntityMock),
+            find: jest.fn().mockResolvedValue([addressEntityMock]),
+          },
         },
         {
           provide: UserService,
@@ -86,5 +90,40 @@ describe('AddressService', () => {
     jest.spyOn(addressRepository, 'save').mockRejectedValueOnce(new Error());
 
     await expect(service.createAddress(createAddressMock, 1)).rejects.toThrow();
+  });
+
+  it('should return all addresses to user', async () => {
+    (addressRepository.find as jest.Mock).mockResolvedValueOnce([
+      addressEntityMock,
+    ]);
+
+    const addresses = await service.findAddressByUserId(userEntityMock.id);
+
+    expect(addresses).toEqual([addressEntityMock]);
+    expect(addressRepository.find).toHaveBeenCalledWith({
+      where: { userId: userEntityMock.id },
+      relations: {
+        city: {
+          state: true,
+        },
+      },
+    });
+  });
+
+  it('should return not found if not address registred', async () => {
+    (addressRepository.find as jest.Mock).mockResolvedValueOnce([]);
+
+    await expect(
+      service.findAddressByUserId(userEntityMock.id),
+    ).rejects.toThrow();
+
+    expect(addressRepository.find).toHaveBeenCalledWith({
+      where: { userId: userEntityMock.id },
+      relations: {
+        city: {
+          state: true,
+        },
+      },
+    });
   });
 });
