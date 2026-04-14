@@ -13,7 +13,10 @@ export class CreteTableUser1775764697042 implements MigrationInterface {
                 password  character varying NOT NULL,
                 created_at timestamp without time zone DEFAULT now() NOT NULL,
                 updated_at timestamp without time zone DEFAULT now() NOT NULL,
-                primary key (id)
+                primary key (id),
+                UNIQUE (email),
+                UNIQUE (cpf)
+
             );
             
             CREATE SEQUENCE public.user_id_seq
