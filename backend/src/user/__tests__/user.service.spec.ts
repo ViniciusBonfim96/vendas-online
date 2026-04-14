@@ -6,6 +6,10 @@ import { UserService } from '@/user/user.service';
 import { createUserMock } from '@/user/__mocks__/createUser.mock';
 import { userEntityMock } from '@/user/__mocks__/user.mock';
 
+jest.mock('bcrypt', () => ({
+  hash: jest.fn().mockResolvedValue('hashedPassword'),
+}));
+
 describe('UserService', () => {
   let service: UserService;
   let userRepository: Repository<UserEntity>;
@@ -44,6 +48,10 @@ describe('UserService', () => {
   it('should return user in findUserByEmail', async () => {
     const user = await service.findUserByEmail(userEntityMock.email);
 
+    expect(userRepository.findOne).toHaveBeenCalledWith({
+      where: { email: userEntityMock.email },
+    });
+
     expect(user).toEqual(userEntityMock);
   });
 
@@ -66,6 +74,10 @@ describe('UserService', () => {
   it('should return user in findUserById', async () => {
     const user = await service.findUserById(userEntityMock.id);
 
+    expect(userRepository.findOne).toHaveBeenCalledWith({
+      where: { id: userEntityMock.id },
+    });
+
     expect(user).toEqual(userEntityMock);
   });
 
@@ -84,18 +96,42 @@ describe('UserService', () => {
   it('should return user in getUserByIdUsingRelations', async () => {
     const user = await service.getUserByIdUsingRelations(userEntityMock.id);
 
+    expect(userRepository.findOne).toHaveBeenCalledWith({
+      where: { id: userEntityMock.id },
+      relations: { addresses: { city: { state: true } } },
+    });
+
     expect(user).toEqual(userEntityMock);
+  });
+
+  it('should return all users', async () => {
+    const users = await service.getAllUser();
+
+    expect(userRepository.find).toHaveBeenCalled();
+    expect(users).toEqual([userEntityMock]);
   });
 
   it('should return error if user exist', async () => {
     await expect(service.createUser(createUserMock)).rejects.toThrow();
   });
 
-  it('should return user if user not exist', async () => {
+  it('should create user if user not exist', async () => {
     jest.spyOn(userRepository, 'find').mockResolvedValueOnce([]);
     jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(null);
 
     const user = await service.createUser(createUserMock);
+
+    expect(userRepository.find).toHaveBeenCalledWith({
+      where: [{ email: createUserMock.email }, { cpf: createUserMock.cpf }],
+    });
+
+    expect(userRepository.create).toHaveBeenCalledWith({
+      ...createUserMock,
+      type_user: 1,
+      password: 'hashedPassword',
+    });
+
+    expect(userRepository.save).toHaveBeenCalled();
 
     expect(user).toEqual(userEntityMock);
   });

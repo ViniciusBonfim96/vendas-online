@@ -38,12 +38,22 @@ describe('StateService', () => {
   });
 
   it('should return list of states', async () => {
-    const state = await service.getAllState();
+    const states = await service.getAllState();
 
-    expect(state).toEqual([stateEntityMock]);
+    expect(stateRepository.find).toHaveBeenCalled();
+    expect(states).toEqual([stateEntityMock]);
   });
 
-  it('should return error in exception', async () => {
+  it('should return empty list when no states exist', async () => {
+    jest.spyOn(stateRepository, 'find').mockResolvedValueOnce([]);
+
+    const states = await service.getAllState();
+
+    expect(stateRepository.find).toHaveBeenCalled();
+    expect(states).toEqual([]);
+  });
+
+  it('should throw error when repository fails', async () => {
     jest.spyOn(stateRepository, 'find').mockRejectedValueOnce(new Error());
 
     await expect(service.getAllState()).rejects.toThrow();

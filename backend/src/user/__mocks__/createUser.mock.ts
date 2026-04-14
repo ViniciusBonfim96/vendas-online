@@ -1,9 +1,10 @@
 import { CreateUserDto } from '@/user/dtos/createUser.dto';
+import { userEntityMock } from './user.mock';
 
 export const createUserMock: CreateUserDto = {
-  cpf: '3214215151',
-  email: 'emailMockTest@email.com',
-  name: 'qudlsjakf',
-  password: 'password',
-  phone: '325632634',
+  name: userEntityMock.name,
+  email: userEntityMock.email,
+  password: userEntityMock.password,
+  cpf: userEntityMock.cpf,
+  phone: userEntityMock.phone,
 };
