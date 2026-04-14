@@ -12,7 +12,7 @@ export class CityService {
     private readonly cacheService: CacheService,
   ) {}
 
-  async getAllCityByStateId(state_id: number): Promise<CityEntity[]> {
+  async getAllCitiesByStateId(state_id: number): Promise<CityEntity[]> {
     return this.cacheService.getCache<CityEntity[]>(`state_${state_id}`, () =>
       this.cityRepository.find({ where: { state_id } }),
     );
