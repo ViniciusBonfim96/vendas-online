@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/createUser.dto';
 import { hash } from 'bcrypt';
-import { ReturnUserDto } from './dtos/returnUser.dto';
+import { UserType } from './enum/user-type.enum';
 
 @Injectable()
 export class UserService {
@@ -33,7 +33,7 @@ export class UserService {
 
     const createdUser = this.userRepository.create({
       ...createUserDto,
-      type_user: 1,
+      type_user: UserType.User,
       password: passwordHash,
     });
 

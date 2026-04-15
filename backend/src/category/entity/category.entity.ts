@@ -13,7 +13,13 @@ export class CategoryEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ name: 'name', type: 'varchar', length: 255, nullable: false })
+  @Column({
+    name: 'name',
+    type: 'varchar',
+    length: 255,
+    nullable: false,
+    unique: true,
+  })
   name!: string;
 
   @CreateDateColumn({

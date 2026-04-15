@@ -8,7 +8,8 @@ export class CreateTableCategory1776208809175 implements MigrationInterface {
                 name character varying NOT NULL,
                 created_at timestamp without time zone DEFAULT now() NOT NULL,
                 updated_at timestamp without time zone DEFAULT now() NOT NULL,
-                primary key (id)
+                primary key (id),
+                UNIQUE (name)
             );
             
             CREATE SEQUENCE public.category_id_seq
