@@ -25,7 +25,7 @@ export class CategoryController {
     return categories.map((categories) => new ReturnCategoryDto(categories));
   }
 
-  @Roles(UserType.Admin, UserType.User)
+  @Roles(UserType.Admin)
   @UsePipes(ValidationPipe)
   @Post()
   async createCategory(
