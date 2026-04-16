@@ -6,9 +6,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateUserDto } from './dtos/createUser.dto';
-import { hash } from 'bcrypt';
+import { CreateUserDto } from '@/user/dtos/createUser.dto';
+import { compare, hash } from 'bcrypt';
 import { UserType } from './enum/user-type.enum';
+import { UpdatePasswordUserDto } from '@/user/dtos/updatePassword.dto';
 
 @Injectable()
 export class UserService {
@@ -81,5 +82,28 @@ export class UserService {
     }
 
     return user;
+  }
+
+  async updatePasswordUser(
+    UserId: number,
+    updatePasswordUserDto: UpdatePasswordUserDto,
+  ): Promise<UserEntity> {
+    const { lastPassword, newPassword } = updatePasswordUserDto;
+
+    const user = await this.findUserById(UserId);
+
+    const validatePassword = await compare(lastPassword, user?.password || '');
+
+    if (!validatePassword) {
+      throw new NotFoundException('The last password invalid');
+    }
+
+    const saltOrRounds = 10;
+    const passwordHash = await hash(newPassword, saltOrRounds);
+
+    return this.userRepository.save({
+      ...user,
+      password: passwordHash,
+    });
   }
 }

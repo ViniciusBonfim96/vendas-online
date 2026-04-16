@@ -7,8 +7,11 @@ import { createUserMock } from '@/user/__mocks__/createUser.mock';
 import { userEntityMock } from '@/user/__mocks__/user.mock';
 
 jest.mock('bcrypt', () => ({
+  compare: jest.fn().mockResolvedValue(true),
   hash: jest.fn().mockResolvedValue('hashedPassword'),
 }));
+import { compare, hash } from 'bcrypt';
+import { updatePasswordMock } from '@/user/__mocks__/updatePassword.mock';
 
 describe('UserService', () => {
   let service: UserService;
@@ -148,5 +151,81 @@ describe('UserService', () => {
     expect(userRepository.save).toHaveBeenCalled();
 
     expect(user).toEqual(userEntityMock);
+  });
+
+  it('should update password successfully', async () => {
+    jest.spyOn(service, 'findUserById').mockResolvedValueOnce(userEntityMock);
+
+    const result = await service.updatePasswordUser(1, updatePasswordMock);
+
+    expect(service.findUserById).toHaveBeenCalledWith(1);
+
+    expect(compare).toHaveBeenCalledWith(
+      updatePasswordMock.lastPassword,
+      userEntityMock.password,
+    );
+
+    expect(hash).toHaveBeenCalledWith(updatePasswordMock.newPassword, 10);
+
+    expect(userRepository.save).toHaveBeenCalledWith({
+      ...userEntityMock,
+      password: 'hashedPassword',
+    });
+
+    expect(result).toEqual(userEntityMock);
+  });
+
+  it('should throw error when last password is invalid', async () => {
+    jest.spyOn(service, 'findUserById').mockResolvedValueOnce(userEntityMock);
+
+    (compare as jest.Mock).mockResolvedValueOnce(false);
+
+    await expect(
+      service.updatePasswordUser(1, updatePasswordMock),
+    ).rejects.toThrow('The last password invalid');
+
+    expect(userRepository.save).not.toHaveBeenCalled();
+  });
+
+  it('should throw error when user not found', async () => {
+    jest
+      .spyOn(service, 'findUserById')
+      .mockRejectedValueOnce(new Error('User not found'));
+
+    await expect(
+      service.updatePasswordUser(1, updatePasswordMock),
+    ).rejects.toThrow('User not found');
+
+    expect(userRepository.save).not.toHaveBeenCalled();
+  });
+
+  it('should throw error when hash fails', async () => {
+    jest.spyOn(service, 'findUserById').mockResolvedValueOnce(userEntityMock);
+
+    (compare as jest.Mock).mockResolvedValueOnce(true);
+    (hash as jest.Mock).mockRejectedValueOnce(new Error('Hash error'));
+
+    await expect(
+      service.updatePasswordUser(1, updatePasswordMock),
+    ).rejects.toThrow('Hash error');
+
+    expect(userRepository.save).not.toHaveBeenCalled();
+  });
+
+  it('should throw error when repository fails on update password', async () => {
+    jest.spyOn(service, 'findUserById').mockResolvedValueOnce(userEntityMock);
+
+    (compare as jest.Mock).mockResolvedValueOnce(true);
+    (hash as jest.Mock).mockResolvedValueOnce('hashedPassword');
+
+    jest
+      .spyOn(userRepository, 'save')
+      .mockRejectedValueOnce(new Error('DB error'));
+
+    await expect(
+      service.updatePasswordUser(1, updatePasswordMock),
+    ).rejects.toThrow('DB error');
+
+    expect(userRepository.save).toHaveBeenCalled();
   });
 });

@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { CategoryEntity } from '@/category/entity/category.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { categoryEntityMock } from '@/category/__mocks__/category.mock';
-import { createCategoryMock } from '@/category/__mocks__/create-category.mock';
+import { createCategoryMock } from '@/category/__mocks__/createCategory.mock';
 
 describe('CategoryService', () => {
   let service: CategoryService;
