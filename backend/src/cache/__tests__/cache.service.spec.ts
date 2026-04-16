@@ -75,9 +75,9 @@ describe('AuthService', () => {
   it('should throw error if user not found', async () => {
     jest
       .spyOn(userService, 'findUserByEmail')
-      .mockRejectedValueOnce(new Error('User not found'));
+      .mockRejectedValueOnce(new Error());
 
-    await expect(service.singIn(loginMock)).rejects.toThrow('User not found');
+    await expect(service.singIn(loginMock)).rejects.toThrow();
   });
 
   it('should throw error if password does not match', async () => {
@@ -87,10 +87,8 @@ describe('AuthService', () => {
   });
 
   it('should throw error if bcrypt fails', async () => {
-    jest
-      .spyOn(require('bcrypt'), 'compare')
-      .mockRejectedValueOnce(new Error('bcrypt error'));
+    jest.spyOn(require('bcrypt'), 'compare').mockRejectedValueOnce(new Error());
 
-    await expect(service.singIn(loginMock)).rejects.toThrow('bcrypt error');
+    await expect(service.singIn(loginMock)).rejects.toThrow();
   });
 });

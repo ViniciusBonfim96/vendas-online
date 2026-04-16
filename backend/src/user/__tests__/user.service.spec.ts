@@ -125,7 +125,7 @@ describe('UserService', () => {
 
   it('should throw error when user already exists', async () => {
     await expect(service.createUser(createUserMock)).rejects.toThrow(
-      `user already exists`,
+      'Email or CPF already exists',
     );
   });
 

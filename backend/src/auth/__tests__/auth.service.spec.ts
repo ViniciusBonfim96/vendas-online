@@ -76,7 +76,9 @@ describe('AuthService', () => {
 
     mockedCompare.mockResolvedValueOnce(false);
 
-    await expect(service.singIn(loginMock)).rejects.toThrow();
+    await expect(service.singIn(loginMock)).rejects.toThrow(
+      'Email or password invalid.',
+    );
   });
 
   it('should throw error if password does not match', async () => {

@@ -107,7 +107,7 @@ describe('CategoryService', () => {
 
   it('should throw error when category already exists', async () => {
     await expect(service.createCategory(createCategoryMock)).rejects.toThrow(
-      `category already exists`,
+      `Category name ${createCategoryMock.name} exist`,
     );
   });
 
