@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { ProductService } from '@/product/product.service';
 import { ProductEntity } from '@/product/entity/product.entity';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -7,6 +7,7 @@ import { productEntityMock } from '@/product/__mocks__/product.mock';
 import { createProductMock } from '@/product/__mocks__/create-product.mock';
 import { CategoryService } from '@/category/category.service';
 import { categoryEntityMock } from '@/category/__mocks__/category.mock';
+import { returnDeleteMock } from '@/product/__mocks__/return-delete.mock';
 
 describe('ProductService', () => {
   let service: ProductService;
@@ -23,6 +24,7 @@ describe('ProductService', () => {
             find: jest.fn().mockResolvedValue([productEntityMock]),
             findOne: jest.fn().mockResolvedValue(productEntityMock),
             save: jest.fn().mockResolvedValue(productEntityMock),
+            delete: jest.fn().mockResolvedValue(returnDeleteMock),
           },
         },
         {
@@ -124,5 +126,78 @@ describe('ProductService', () => {
     await expect(service.createProduct(createProductMock)).rejects.toThrow(
       'Database error',
     );
+  });
+
+  it('should return product by id', async () => {
+    const product = await service.findProductById(productEntityMock.id);
+
+    expect(productRepository.findOne).toHaveBeenCalledWith({
+      where: { id: productEntityMock.id },
+    });
+    expect(product).toEqual(productEntityMock);
+  });
+
+  it('should throw error when product not found ', async () => {
+    jest.spyOn(productRepository, 'findOne').mockResolvedValueOnce(null);
+
+    await expect(service.findProductById(productEntityMock.id)).rejects.toThrow(
+      `Product id: ${productEntityMock.id} not found`,
+    );
+
+    expect(productRepository.findOne).toHaveBeenCalledWith({
+      where: { id: productEntityMock.id },
+    });
+  });
+
+  it('should throw error when repository fails on findProductById', async () => {
+    jest
+      .spyOn(productRepository, 'findOne')
+      .mockRejectedValueOnce(new Error('DB error'));
+
+    await expect(service.findProductById(productEntityMock.id)).rejects.toThrow(
+      'DB error',
+    );
+
+    expect(productRepository.findOne).toHaveBeenCalledWith({
+      where: { id: productEntityMock.id },
+    });
+  });
+
+  it('should delete product successfully', async () => {
+    const product = await service.deleteProduct(productEntityMock.id);
+
+    expect(productRepository.delete).toHaveBeenCalledWith({
+      id: productEntityMock.id,
+    });
+
+    expect(product).toEqual(returnDeleteMock);
+  });
+
+  it('should throw error when product not found on delete', async () => {
+    jest
+      .spyOn(productRepository, 'delete')
+      .mockResolvedValueOnce({ affected: 0 } as DeleteResult);
+
+    await expect(service.deleteProduct(productEntityMock.id)).rejects.toThrow(
+      `Product id: ${productEntityMock.id} not found`,
+    );
+
+    expect(productRepository.delete).toHaveBeenCalledWith({
+      id: productEntityMock.id,
+    });
+  });
+
+  it('should throw error when repository fails on delete', async () => {
+    jest
+      .spyOn(productRepository, 'delete')
+      .mockRejectedValueOnce(new Error('DB error'));
+
+    await expect(service.deleteProduct(productEntityMock.id)).rejects.toThrow(
+      'DB error',
+    );
+
+    expect(productRepository.delete).toHaveBeenCalledWith({
+      id: productEntityMock.id,
+    });
   });
 });
