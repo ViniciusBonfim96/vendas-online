@@ -28,11 +28,15 @@ describe('AddressService', () => {
         },
         {
           provide: UserService,
-          useValue: { findUserById: jest.fn().mockResolvedValue(true) },
+          useValue: {
+            findUserById: jest.fn().mockResolvedValue(userEntityMock),
+          },
         },
         {
           provide: CityService,
-          useValue: { findCityById: jest.fn().mockResolvedValue(true) },
+          useValue: {
+            findCityById: jest.fn().mockResolvedValue(true),
+          },
         },
       ],
     }).compile();
@@ -52,12 +56,15 @@ describe('AddressService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
     expect(addressRepository).toBeDefined();
+    expect(userService).toBeDefined();
+    expect(cityService).toBeDefined();
   });
 
   it('should create address successfully', async () => {
     const result = await service.createAddress(createAddressMock, 1);
 
     expect(userService.findUserById).toHaveBeenCalledWith(1);
+
     expect(cityService.findCityById).toHaveBeenCalledWith(
       createAddressMock.cityId,
     );
@@ -70,36 +77,43 @@ describe('AddressService', () => {
     expect(result).toEqual(addressEntityMock);
   });
 
-  it('should throw error if user not found', async () => {
-    jest.spyOn(userService, 'findUserById').mockRejectedValueOnce(new Error());
+  it('should throw error when user does not exist', async () => {
+    jest
+      .spyOn(userService, 'findUserById')
+      .mockRejectedValueOnce(new Error('User not found'));
 
-    await expect(service.createAddress(createAddressMock, 1)).rejects.toThrow();
-
-    expect(addressRepository.save).not.toHaveBeenCalled();
-  });
-
-  it('should throw error if city not found', async () => {
-    jest.spyOn(cityService, 'findCityById').mockRejectedValueOnce(new Error());
-
-    await expect(service.createAddress(createAddressMock, 1)).rejects.toThrow();
+    await expect(service.createAddress(createAddressMock, 1)).rejects.toThrow(
+      'User not found',
+    );
 
     expect(addressRepository.save).not.toHaveBeenCalled();
   });
 
-  it('should throw error if repository fails', async () => {
-    jest.spyOn(addressRepository, 'save').mockRejectedValueOnce(new Error());
+  it('should throw error when city does not exist', async () => {
+    jest
+      .spyOn(cityService, 'findCityById')
+      .mockRejectedValueOnce(new Error('City not found'));
 
-    await expect(service.createAddress(createAddressMock, 1)).rejects.toThrow();
+    await expect(service.createAddress(createAddressMock, 1)).rejects.toThrow(
+      'City not found',
+    );
+
+    expect(addressRepository.save).not.toHaveBeenCalled();
   });
 
-  it('should return all addresses to user', async () => {
-    (addressRepository.find as jest.Mock).mockResolvedValueOnce([
-      addressEntityMock,
-    ]);
+  it('should throw error when repository fails on save', async () => {
+    jest
+      .spyOn(addressRepository, 'save')
+      .mockRejectedValueOnce(new Error('Database error'));
 
-    const addresses = await service.findAddressByUserId(userEntityMock.id);
+    await expect(service.createAddress(createAddressMock, 1)).rejects.toThrow(
+      'Database error',
+    );
+  });
 
-    expect(addresses).toEqual([addressEntityMock]);
+  it('should return all addresses by user id', async () => {
+    const result = await service.findAddressByUserId(userEntityMock.id);
+
     expect(addressRepository.find).toHaveBeenCalledWith({
       where: { userId: userEntityMock.id },
       relations: {
@@ -108,10 +122,12 @@ describe('AddressService', () => {
         },
       },
     });
+
+    expect(result).toEqual([addressEntityMock]);
   });
 
-  it('should return not found if not address registred', async () => {
-    (addressRepository.find as jest.Mock).mockResolvedValueOnce([]);
+  it('should throw error when no addresses exist for user', async () => {
+    jest.spyOn(addressRepository, 'find').mockResolvedValueOnce([]);
 
     await expect(
       service.findAddressByUserId(userEntityMock.id),

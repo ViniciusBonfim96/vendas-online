@@ -1,25 +1,44 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CacheService } from '@/cache/cache.service';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import { AuthService } from '@/auth/auth.service';
+import { UserService } from '@/user/user.service';
+import { JwtService } from '@nestjs/jwt';
+import { userEntityMock } from '@/user/__mocks__/user.mock';
+import { ReturnUserDto } from '@/user/dtos/returnUser.dto';
+import { loginMock } from '@/auth/__mocks__/login.mock';
 
-describe('CacheService', () => {
-  let service: CacheService;
-  let cacheManager: Cache;
+jest.mock('bcrypt', () => ({
+  compare: jest.fn(),
+}));
+
+import { compare } from 'bcrypt';
+
+describe('AuthService', () => {
+  let service: AuthService;
+  let userService: UserService;
+  let jwtService: JwtService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        CacheService,
+        AuthService,
         {
-          provide: CACHE_MANAGER,
-          useValue: { get: jest.fn(), set: jest.fn() },
+          provide: UserService,
+          useValue: {
+            findUserByEmail: jest.fn().mockResolvedValue(userEntityMock),
+          },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            sign: jest.fn().mockReturnValue('fakeToken'),
+          },
         },
       ],
     }).compile();
 
-    service = module.get<CacheService>(CacheService);
-    cacheManager = module.get<Cache>(CACHE_MANAGER);
+    service = module.get<AuthService>(AuthService);
+    userService = module.get<UserService>(UserService);
+    jwtService = module.get<JwtService>(JwtService);
   });
 
   afterEach(() => {
@@ -28,56 +47,50 @@ describe('CacheService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
-    expect(cacheManager).toBeDefined();
   });
 
-  it('should return data from cache when exists (cache hit)', async () => {
-    (cacheManager.get as jest.Mock).mockResolvedValueOnce('cached-data');
+  it('should login successfully', async () => {
+    jest.spyOn(require('bcrypt'), 'compare').mockResolvedValueOnce(true);
 
-    const functionRequest = jest.fn();
+    const result = await service.singIn(loginMock);
 
-    const result = await service.getCache('test-key', functionRequest);
+    expect(userService.findUserByEmail).toHaveBeenCalledWith(loginMock.email);
 
-    expect(cacheManager.get).toHaveBeenCalledWith('test-key');
-    expect(functionRequest).not.toHaveBeenCalled();
-    expect(cacheManager.set).not.toHaveBeenCalled();
-    expect(result).toBe('cached-data');
-  });
-
-  it('should call function and store result when cache miss', async () => {
-    (cacheManager.get as jest.Mock).mockResolvedValueOnce(null);
-
-    const functionRequest = jest.fn().mockResolvedValue('fresh-data');
-
-    const result = await service.getCache('test-key', functionRequest);
-
-    expect(cacheManager.get).toHaveBeenCalledWith('test-key');
-    expect(functionRequest).toHaveBeenCalled();
-    expect(cacheManager.set).toHaveBeenCalledWith('test-key', 'fresh-data');
-    expect(result).toBe('fresh-data');
-  });
-
-  it('should throw error if functionRequest fails', async () => {
-    (cacheManager.get as jest.Mock).mockResolvedValueOnce(null);
-
-    const functionRequest = jest.fn().mockRejectedValue(new Error('fail'));
-
-    await expect(
-      service.getCache('test-key', functionRequest),
-    ).rejects.toThrow();
-  });
-
-  it('should throw error if cache set fails', async () => {
-    (cacheManager.get as jest.Mock).mockResolvedValueOnce(null);
-
-    const functionRequest = jest.fn().mockResolvedValue('data');
-
-    (cacheManager.set as jest.Mock).mockRejectedValueOnce(
-      new Error('set fail'),
+    expect(compare).toHaveBeenCalledWith(
+      loginMock.password,
+      userEntityMock.password,
     );
 
-    await expect(
-      service.getCache('test-key', functionRequest),
-    ).rejects.toThrow();
+    expect(jwtService.sign).toHaveBeenCalledWith({
+      id: userEntityMock.id,
+      typeUser: userEntityMock.type_user,
+    });
+
+    expect(result).toEqual({
+      user: new ReturnUserDto(userEntityMock),
+      accessToken: 'fakeToken',
+    });
+  });
+
+  it('should throw error if user not found', async () => {
+    jest
+      .spyOn(userService, 'findUserByEmail')
+      .mockRejectedValueOnce(new Error('User not found'));
+
+    await expect(service.singIn(loginMock)).rejects.toThrow('User not found');
+  });
+
+  it('should throw error if password does not match', async () => {
+    jest.spyOn(require('bcrypt'), 'compare').mockResolvedValueOnce(false);
+
+    await expect(service.singIn(loginMock)).rejects.toThrow();
+  });
+
+  it('should throw error if bcrypt fails', async () => {
+    jest
+      .spyOn(require('bcrypt'), 'compare')
+      .mockRejectedValueOnce(new Error('bcrypt error'));
+
+    await expect(service.singIn(loginMock)).rejects.toThrow('bcrypt error');
   });
 });

@@ -25,6 +25,12 @@ export class CategoryService {
     });
   }
 
+  async findCategoryById(id: number): Promise<CategoryEntity | null> {
+    return this.categoryRepository.findOne({
+      where: { id: id },
+    });
+  }
+
   async createCategory(
     createCategoryDto: CreateCategoryDto,
   ): Promise<CategoryEntity> {

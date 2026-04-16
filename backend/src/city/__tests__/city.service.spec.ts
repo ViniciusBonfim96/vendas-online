@@ -11,10 +11,6 @@ describe('CityService', () => {
   let cityRepository: Repository<CityEntity>;
   let cacheService: CacheService;
 
-  const mockCacheService = () => ({
-    getCache: jest.fn(async (key, callback) => await callback()),
-  });
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -29,7 +25,9 @@ describe('CityService', () => {
         {
           provide: CacheService,
           useValue: {
-            getCache: jest.fn(async (key, callback) => await callback()),
+            getCache: jest.fn().mockImplementation(async (key, callback) => {
+              return callback();
+            }),
           },
         },
       ],
@@ -49,9 +47,10 @@ describe('CityService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
     expect(cityRepository).toBeDefined();
+    expect(cacheService).toBeDefined();
   });
 
-  it('should return findOne City', async () => {
+  it('should return city by id', async () => {
     const city = await service.findCityById(cityEntityMock.id);
 
     expect(cityRepository.findOne).toHaveBeenCalledWith({
@@ -61,13 +60,13 @@ describe('CityService', () => {
     expect(city).toEqual(cityEntityMock);
   });
 
-  it('should return error findOne not found', async () => {
+  it('should throw error when city not found', async () => {
     jest.spyOn(cityRepository, 'findOne').mockResolvedValueOnce(null);
 
     await expect(service.findCityById(cityEntityMock.id)).rejects.toThrow();
   });
 
-  it('should return Cities in getAllCitiesByStateId', async () => {
+  it('should return cities by state id using cache', async () => {
     const city = await service.getAllCitiesByStateId(cityEntityMock.id);
 
     expect(cacheService.getCache).toHaveBeenCalledWith(

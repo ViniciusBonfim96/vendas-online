@@ -45,7 +45,7 @@ describe('UserService', () => {
     expect(userRepository).toBeDefined();
   });
 
-  it('should return user in findUserByEmail', async () => {
+  it('should return user by email', async () => {
     const user = await service.findUserByEmail(userEntityMock.email);
 
     expect(userRepository.findOne).toHaveBeenCalledWith({
@@ -55,7 +55,7 @@ describe('UserService', () => {
     expect(user).toEqual(userEntityMock);
   });
 
-  it('should return error in findUserByEmail', async () => {
+  it('should throw error when user by email does not exist', async () => {
     jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(null);
 
     await expect(
@@ -63,15 +63,17 @@ describe('UserService', () => {
     ).rejects.toThrow();
   });
 
-  it('should return error in findUserByEmail (error DB)', async () => {
-    jest.spyOn(userRepository, 'findOne').mockRejectedValueOnce(new Error());
+  it('should throw error when DB fails on findUserByEmail', async () => {
+    jest
+      .spyOn(userRepository, 'findOne')
+      .mockRejectedValueOnce(new Error('DB error'));
 
-    await expect(
-      service.findUserByEmail(userEntityMock.email),
-    ).rejects.toThrow();
+    await expect(service.findUserByEmail(userEntityMock.email)).rejects.toThrow(
+      'DB error',
+    );
   });
 
-  it('should return user in findUserById', async () => {
+  it('should return user by id', async () => {
     const user = await service.findUserById(userEntityMock.id);
 
     expect(userRepository.findOne).toHaveBeenCalledWith({
@@ -81,41 +83,53 @@ describe('UserService', () => {
     expect(user).toEqual(userEntityMock);
   });
 
-  it('should return error in findUserById', async () => {
+  it('should throw error when user by id does not exist', async () => {
     jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(null);
 
     await expect(service.findUserById(userEntityMock.id)).rejects.toThrow();
   });
 
-  it('should return error in findUserById (error DB)', async () => {
-    jest.spyOn(userRepository, 'findOne').mockRejectedValueOnce(new Error());
+  it('should throw error when DB fails on findUserById', async () => {
+    jest
+      .spyOn(userRepository, 'findOne')
+      .mockRejectedValueOnce(new Error('DB error'));
 
-    await expect(service.findUserById(userEntityMock.id)).rejects.toThrow();
+    await expect(service.findUserById(userEntityMock.id)).rejects.toThrow(
+      'DB error',
+    );
   });
 
-  it('should return user in getUserByIdUsingRelations', async () => {
+  it('should return user with relations', async () => {
     const user = await service.getUserByIdUsingRelations(userEntityMock.id);
 
     expect(userRepository.findOne).toHaveBeenCalledWith({
       where: { id: userEntityMock.id },
-      relations: { addresses: { city: { state: true } } },
+      relations: {
+        addresses: {
+          city: {
+            state: true,
+          },
+        },
+      },
     });
 
     expect(user).toEqual(userEntityMock);
   });
 
   it('should return all users', async () => {
-    const users = await service.getAllUser();
+    const user = await service.getAllUser();
 
     expect(userRepository.find).toHaveBeenCalled();
-    expect(users).toEqual([userEntityMock]);
+    expect(user).toEqual([userEntityMock]);
   });
 
-  it('should return error if user exist', async () => {
-    await expect(service.createUser(createUserMock)).rejects.toThrow();
+  it('should throw error when user already exists', async () => {
+    await expect(service.createUser(createUserMock)).rejects.toThrow(
+      `user already exists`,
+    );
   });
 
-  it('should create user if user not exist', async () => {
+  it('should create user when not exists', async () => {
     jest.spyOn(userRepository, 'find').mockResolvedValueOnce([]);
     jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(null);
 
