@@ -3,6 +3,9 @@ import { UserType } from '@/user/enum/user-type.enum';
 import {
   Body,
   Controller,
+  Delete,
+  Get,
+  NotFoundException,
   Post,
   UsePipes,
   ValidationPipe,
@@ -26,5 +29,23 @@ export class CartController {
     return new ReturnCartDto(
       await this.cartService.insertProductInCart(insertCardDto, userId),
     );
+  }
+
+  @Get()
+  async findCartByUserId(@UserId() userId: number): Promise<ReturnCartDto> {
+    const cart = await this.cartService.findCartByUserId(userId);
+
+    if (!cart) {
+      throw new NotFoundException(`Cart for userId: ${userId} not found`);
+    }
+
+    return new ReturnCartDto(cart);
+  }
+
+  @Delete()
+  async clearCart(@UserId() userId: number) {
+    await this.cartService.clearCart(userId);
+
+    return { message: 'Cart cleared successfully' };
   }
 }

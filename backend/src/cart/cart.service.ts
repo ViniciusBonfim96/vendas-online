@@ -4,6 +4,7 @@ import { CartEntity } from '@/cart/entity/cart.entity';
 import { Repository } from 'typeorm';
 import { InsertCardDto } from './dto/insertCart.dto';
 import { CartProductService } from '@/cart-product/cart-product.service';
+import { DeleteResult } from 'typeorm/browser';
 
 @Injectable()
 export class CartService {
@@ -40,5 +41,18 @@ export class CartService {
     await this.cartProductServer.insertProductInCart(insertCardDto, cart);
 
     return cart;
+  }
+
+  async clearCart(userId: number) {
+    let cart = await this.findCartByUserId(userId);
+
+    if (!cart) {
+      throw new NotFoundException(`CartId: ${userId} not found`);
+    }
+
+    await this.cartRepository.save({
+      ...cart,
+      active: false,
+    });
   }
 }
