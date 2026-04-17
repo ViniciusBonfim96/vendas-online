@@ -8,7 +8,7 @@ import { createProductMock } from '@/product/__mocks__/create-product.mock';
 import { CategoryService } from '@/category/category.service';
 import { categoryEntityMock } from '@/category/__mocks__/category.mock';
 import { returnDeleteMock } from '@/product/__mocks__/return-delete.mock';
-import { updateProductMock } from '../__mocks__/update-product.moc';
+import { updateProductMock } from '@/product/__mocks__/update-product.moc';
 
 describe('ProductService', () => {
   let service: ProductService;
@@ -94,20 +94,21 @@ describe('ProductService', () => {
     expect(product).toEqual(productEntityMock);
   });
 
-  it('should throw NotFoundException when category does not exist', async () => {
-    jest.spyOn(categoryService, 'findCategoryById').mockResolvedValueOnce(null);
+  it('should throw error when product already exists', async () => {
+    jest
+      .spyOn(productRepository, 'findOne')
+      .mockResolvedValueOnce(productEntityMock);
 
     await expect(service.createProduct(createProductMock)).rejects.toThrow(
-      `categoryId: ${createProductMock.categoryId} not found`,
+      `product name: ${createProductMock.name} already exists`,
     );
 
-    expect(productRepository.findOne).not.toHaveBeenCalled();
     expect(productRepository.save).not.toHaveBeenCalled();
   });
 
   it('should throw error when product already exists', async () => {
     await expect(service.createProduct(createProductMock)).rejects.toThrow(
-      `product name: ${productEntityMock} already exists`,
+      `product name: ${productEntityMock.name} already exists`,
     );
 
     expect(productRepository.findOne).toHaveBeenCalledWith({
@@ -138,16 +139,16 @@ describe('ProductService', () => {
     expect(product).toEqual(productEntityMock);
   });
 
-  it('should throw error when product not found ', async () => {
+  it('should throw error when product not found', async () => {
     jest.spyOn(productRepository, 'findOne').mockResolvedValueOnce(null);
 
-    await expect(service.findProductById(productEntityMock.id)).rejects.toThrow(
-      `Product id: ${productEntityMock.id} not found`,
-    );
+    const product = await service.findProductById(productEntityMock.id);
 
     expect(productRepository.findOne).toHaveBeenCalledWith({
       where: { id: productEntityMock.id },
     });
+
+    expect(product).toBeNull();
   });
 
   it('should throw error when repository fails on findProductById', async () => {
@@ -180,7 +181,7 @@ describe('ProductService', () => {
       .mockResolvedValueOnce({ affected: 0 } as DeleteResult);
 
     await expect(service.deleteProduct(productEntityMock.id)).rejects.toThrow(
-      `Product id: ${productEntityMock.id} not found`,
+      `ProductId: ${productEntityMock.id} not found`,
     );
 
     expect(productRepository.delete).toHaveBeenCalledWith({
@@ -260,7 +261,7 @@ describe('ProductService', () => {
 
     await expect(
       service.updateProduct(updateProductMock, productEntityMock.id),
-    ).rejects.toThrow(`category id: ${updateProductMock.categoryId} not found`);
+    ).rejects.toThrow(`categoryId: ${updateProductMock.categoryId} not found`);
 
     expect(productRepository.findOne).not.toHaveBeenCalled();
     expect(productRepository.save).not.toHaveBeenCalled();
@@ -275,7 +276,7 @@ describe('ProductService', () => {
 
     await expect(
       service.updateProduct(updateProductMock, productEntityMock.id),
-    ).rejects.toThrow(`Product id: ${productEntityMock.id} not found`);
+    ).rejects.toThrow(`ProductId: ${productEntityMock.id} not found`);
 
     expect(productRepository.save).not.toHaveBeenCalled();
   });

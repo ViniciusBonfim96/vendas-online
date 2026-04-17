@@ -35,32 +35,26 @@ export class ProductService {
 
     if (productExist) {
       throw new NotFoundException(
-        `product name: ${productExist} already exists`,
+        `product name: ${productExist.name} already exists`,
       );
     }
 
     return this.productRepository.save(createProductDto);
   }
 
-  async findProductById(productId: number): Promise<ProductEntity> {
-    const product = await this.productRepository.findOne({
+  async findProductById(productId: number): Promise<ProductEntity | null> {
+    return this.productRepository.findOne({
       where: {
         id: productId,
       },
     });
-
-    if (!product) {
-      throw new NotFoundException(`Product id: ${productId} not found`);
-    }
-
-    return product;
   }
 
   async deleteProduct(productId: number): Promise<DeleteResult> {
     const result = await this.productRepository.delete({ id: productId });
 
     if (!result.affected) {
-      throw new NotFoundException(`Product id: ${productId} not found`);
+      throw new NotFoundException(`ProductId: ${productId} not found`);
     }
 
     return result;
@@ -77,12 +71,16 @@ export class ProductService {
 
       if (!category) {
         throw new NotFoundException(
-          `category id: ${updateProductDto.categoryId} not found`,
+          `categoryId: ${updateProductDto.categoryId} not found`,
         );
       }
     }
 
     const product = await this.findProductById(productId);
+
+    if (!product) {
+      throw new NotFoundException(`ProductId: ${productId} not found`);
+    }
 
     return this.productRepository.save({
       ...product,
