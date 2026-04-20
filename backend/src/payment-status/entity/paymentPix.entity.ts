@@ -1,12 +1,12 @@
 import { PaymentEntity } from '@/payment/entity/payment.entity';
-import { ChildEntity, Column, CreateDateColumn } from 'typeorm';
+import { ChildEntity, Column } from 'typeorm';
 
 @ChildEntity()
 export class PaymentPixEntity extends PaymentEntity {
   @Column({ name: 'code', nullable: false })
   code!: number;
 
-  @CreateDateColumn({
+  @Column({
     name: 'date_payment',
     type: 'timestamp',
     precision: 0,
