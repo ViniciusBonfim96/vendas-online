@@ -49,7 +49,7 @@ describe('AuthService', () => {
   it('should login successfully', async () => {
     (compare as jest.Mock).mockResolvedValueOnce(true);
 
-    const result = await service.singIn(loginMock);
+    const result = await service.signIn(loginMock);
 
     expect(userService.findUserByEmail).toHaveBeenCalledWith(loginMock.email);
 
@@ -76,7 +76,7 @@ describe('AuthService', () => {
 
     mockedCompare.mockResolvedValueOnce(false);
 
-    await expect(service.singIn(loginMock)).rejects.toThrow(
+    await expect(service.signIn(loginMock)).rejects.toThrow(
       'Email or password invalid.',
     );
   });
@@ -84,12 +84,12 @@ describe('AuthService', () => {
   it('should throw error if password does not match', async () => {
     mockedCompare.mockResolvedValueOnce(false);
 
-    await expect(service.singIn(loginMock)).rejects.toThrow();
+    await expect(service.signIn(loginMock)).rejects.toThrow();
   });
 
   it('should throw error if bcrypt fails', async () => {
     mockedCompare.mockRejectedValueOnce(new Error());
 
-    await expect(service.singIn(loginMock)).rejects.toThrow();
+    await expect(service.signIn(loginMock)).rejects.toThrow();
   });
 });

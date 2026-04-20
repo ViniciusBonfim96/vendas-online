@@ -52,7 +52,7 @@ describe('AuthService', () => {
   it('should login successfully', async () => {
     jest.spyOn(require('bcrypt'), 'compare').mockResolvedValueOnce(true);
 
-    const result = await service.singIn(loginMock);
+    const result = await service.signIn(loginMock);
 
     expect(userService.findUserByEmail).toHaveBeenCalledWith(loginMock.email);
 
@@ -77,18 +77,18 @@ describe('AuthService', () => {
       .spyOn(userService, 'findUserByEmail')
       .mockRejectedValueOnce(new Error());
 
-    await expect(service.singIn(loginMock)).rejects.toThrow();
+    await expect(service.signIn(loginMock)).rejects.toThrow();
   });
 
   it('should throw error if password does not match', async () => {
     jest.spyOn(require('bcrypt'), 'compare').mockResolvedValueOnce(false);
 
-    await expect(service.singIn(loginMock)).rejects.toThrow();
+    await expect(service.signIn(loginMock)).rejects.toThrow();
   });
 
   it('should throw error if bcrypt fails', async () => {
     jest.spyOn(require('bcrypt'), 'compare').mockRejectedValueOnce(new Error());
 
-    await expect(service.singIn(loginMock)).rejects.toThrow();
+    await expect(service.signIn(loginMock)).rejects.toThrow();
   });
 });

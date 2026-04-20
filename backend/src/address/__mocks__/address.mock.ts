@@ -1,5 +1,5 @@
-import { cityEntityMock } from '@/city/__mock__/city.mock';
-import { AddressEntity } from '../entity/address.entity';
+import { cityEntityMock } from '@/city/__mocks__/city.mock';
+import { AddressEntity } from '@/address/entity/address.entity';
 import { userEntityMock } from '@/user/__mocks__/user.mock';
 
 export const addressEntityMock: AddressEntity = {

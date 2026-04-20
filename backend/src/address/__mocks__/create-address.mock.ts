@@ -1,5 +1,5 @@
-import { cityEntityMock } from '@/city/__mock__/city.mock';
-import { addressEntityMock } from './address.mock';
+import { cityEntityMock } from '@/city/__mocks__/city.mock';
+import { addressEntityMock } from '@/address/__mocks__/address.mock';
 import { CreateAddressDto } from '../dto/createAddress.dto';
 
 export const createAddressMock: CreateAddressDto = {
