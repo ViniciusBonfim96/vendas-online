@@ -4,11 +4,11 @@ import { ProductEntity } from '@/product/entity/product.entity';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { productEntityMock } from '@/product/__mocks__/product.mock';
-import { createProductMock } from '@/product/__mocks__/create-product.mock';
+import { createProductMock } from '@/product/__mocks__/createProduct.mock';
 import { CategoryService } from '@/category/category.service';
 import { categoryEntityMock } from '@/category/__mocks__/category.mock';
-import { returnDeleteMock } from '@/product/__mocks__/return-delete.mock';
-import { updateProductMock } from '@/product/__mocks__/update-product.moc';
+import { returnDeleteMock } from '@/product/__mocks__/returnDelete.mock';
+import { updateProductMock } from '@/product/__mocks__/updateProduct.mock';
 
 describe('ProductService', () => {
   let service: ProductService;
