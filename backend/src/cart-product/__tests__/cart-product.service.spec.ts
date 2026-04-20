@@ -7,7 +7,7 @@ import { ProductService } from '@/product/product.service';
 
 describe('CartProductService', () => {
   let service: CartProductService;
-  let serviceProduct: ProductService;
+  let producService: ProductService;
   let cartRepository: Repository<CartProductEntity>;
 
   beforeEach(async () => {
@@ -29,7 +29,7 @@ describe('CartProductService', () => {
     cartRepository = module.get<Repository<CartProductEntity>>(
       getRepositoryToken(CartProductEntity),
     );
-    serviceProduct = module.get<ProductService>(ProductService);
+    producService = module.get<ProductService>(ProductService);
   });
 
   afterEach(() => {

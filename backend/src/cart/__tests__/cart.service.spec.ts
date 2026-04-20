@@ -4,10 +4,12 @@ import { CartService } from '@/cart/cart.service';
 import { Repository } from 'typeorm';
 import { CartEntity } from '@/cart/entity/cart.entity';
 import { CartProductService } from '@/cart-product/cart-product.service';
+import { ProductService } from '@/product/product.service';
 
 describe('CartService', () => {
   let service: CartService;
-  let cartProductServer: CartProductService;
+  let cartProductService: CartProductService;
+  let productService: ProductService;
   let cartRepository: Repository<CartEntity>;
 
   beforeEach(async () => {
@@ -22,6 +24,10 @@ describe('CartService', () => {
           provide: CartProductService,
           useValue: {},
         },
+        {
+          provide: ProductService,
+          useValue: {},
+        },
       ],
     }).compile();
 
@@ -29,7 +35,8 @@ describe('CartService', () => {
     cartRepository = module.get<Repository<CartEntity>>(
       getRepositoryToken(CartEntity),
     );
-    cartProductServer = module.get<CartProductService>(CartProductService);
+    cartProductService = module.get<CartProductService>(CartProductService);
+    productService = module.get<ProductService>(ProductService);
   });
 
   afterEach(() => {
