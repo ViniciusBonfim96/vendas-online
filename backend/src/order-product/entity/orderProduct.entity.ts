@@ -1,7 +1,11 @@
+import { OrderEntity } from '@/order/entity/order.entity';
+import { ProductEntity } from '@/product/entity/product.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -38,4 +42,12 @@ export class OrderProductEntity {
     default: () => 'CURRENT_TIMESTAMP',
   })
   updated_at!: Date;
+
+  @ManyToMany(() => OrderEntity, (order) => order.ordersProduct)
+  @JoinColumn({ name: 'order_id', referencedColumnName: 'id' })
+  order?: OrderEntity;
+
+  @ManyToMany(() => ProductEntity, (product) => product.ordersProduct)
+  @JoinColumn({ name: 'product_id', referencedColumnName: 'id' })
+  product?: ProductEntity;
 }

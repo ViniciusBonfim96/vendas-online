@@ -1,7 +1,9 @@
 import { NameField } from '@/common/validation';
+import { PaymentEntity } from '@/payment/entity/payment.entity';
 import {
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -29,4 +31,7 @@ export class PaymentStatusEntity {
     default: () => 'CURRENT_TIMESTAMP',
   })
   updated_at!: Date;
+
+  @OneToMany(() => PaymentEntity, (payment) => payment.paymentStatus)
+  payments?: PaymentEntity[];
 }

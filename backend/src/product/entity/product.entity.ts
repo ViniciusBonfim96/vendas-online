@@ -1,5 +1,6 @@
 import { CartProductEntity } from '@/cart-product/entity/cart-product.entity';
 import { CategoryEntity } from '@/category/entity/category.entity';
+import { OrderProductEntity } from '@/order-product/entity/orderProduct.entity';
 import {
   Column,
   CreateDateColumn,
@@ -50,4 +51,7 @@ export class ProductEntity {
   @ManyToOne(() => CategoryEntity, (category) => category.products)
   @JoinColumn({ name: 'category_id', referencedColumnName: 'id' })
   category?: CategoryEntity;
+
+  @OneToMany(() => OrderProductEntity, (orderProduct) => orderProduct.product)
+  ordersProduct?: OrderProductEntity[];
 }

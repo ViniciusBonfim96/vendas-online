@@ -1,8 +1,13 @@
 import { NameField } from '@/common/validation';
+import { OrderEntity } from '@/order/entity/order.entity';
+import { PaymentStatusEntity } from '@/payment-status/entity/paymentStatus.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   TableInheritance,
   UpdateDateColumn,
@@ -44,4 +49,11 @@ export abstract class PaymentEntity {
     default: () => 'CURRENT_TIMESTAMP',
   })
   updated_at!: Date;
+
+  @OneToMany(() => OrderEntity, (order) => order.payment)
+  orders?: OrderEntity[];
+
+  @ManyToOne(() => PaymentStatusEntity, (payment) => payment.payments)
+  @JoinColumn({ name: 'status_id', referencedColumnName: 'id' })
+  paymentStatus?: PaymentStatusEntity;
 }
