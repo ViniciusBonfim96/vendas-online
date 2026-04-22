@@ -1,4 +1,4 @@
-import { DeleteResult, Repository } from 'typeorm';
+import { DeleteResult, In, Repository } from 'typeorm';
 import { ProductService } from '@/product/product.service';
 import { ProductEntity } from '@/product/entity/product.entity';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -9,6 +9,7 @@ import { CategoryService } from '@/category/category.service';
 import { categoryEntityMock } from '@/category/__mocks__/category.mock';
 import { returnDeleteMock } from '@/product/__mocks__/returnDelete.mock';
 import { updateProductMock } from '@/product/__mocks__/updateProduct.mock';
+import { BadRequestException } from '@nestjs/common';
 
 describe('ProductService', () => {
   let service: ProductService;
@@ -302,5 +303,42 @@ describe('ProductService', () => {
       ...productEntityMock,
       ...updateProductMock,
     });
+  });
+
+  it('should return products when valid productId array is provided', async () => {
+    const productIds = [1, 2, 3];
+
+    const mockProducts = [{ id: 1 }, { id: 2 }, { id: 3 }] as ProductEntity[];
+
+    (productRepository.find as jest.Mock).mockResolvedValueOnce(mockProducts);
+
+    const result = await service.findAllProductsById(productIds);
+
+    expect(productRepository.find).toHaveBeenCalledWith({
+      where: { id: In(productIds) },
+      relations: { category: true },
+    });
+
+    expect(result).toEqual(mockProducts);
+  });
+
+  it('should throw BadRequestException when productId is empty array', async () => {
+    await expect(service.findAllProductsById([])).rejects.toThrow(
+      BadRequestException,
+    );
+
+    await expect(service.findAllProductsById([])).rejects.toThrow(
+      'productId must be a non-empty array',
+    );
+
+    expect(productRepository.find).not.toHaveBeenCalled();
+  });
+
+  it('should throw BadRequestException when productId is undefined', async () => {
+    await expect(service.findAllProductsById(undefined)).rejects.toThrow(
+      BadRequestException,
+    );
+
+    expect(productRepository.find).not.toHaveBeenCalled();
   });
 });

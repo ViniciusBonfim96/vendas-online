@@ -8,6 +8,7 @@ import {
   Entity,
   JoinColumn,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -55,11 +56,11 @@ export class OrderEntity {
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user?: UserEntity;
 
-  @ManyToMany(() => AddressEntity, (address) => address.orders)
+  @ManyToOne(() => AddressEntity, (address) => address.orders)
   @JoinColumn({ name: 'address_id', referencedColumnName: 'id' })
   address?: AddressEntity;
 
-  @ManyToMany(() => PaymentEntity, (payment) => payment.orders)
+  @ManyToOne(() => PaymentEntity, (payment) => payment.orders)
   @JoinColumn({ name: 'payment_id', referencedColumnName: 'id' })
   payment?: PaymentEntity;
 

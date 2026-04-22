@@ -1,7 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductEntity } from '@/product/entity/product.entity';
-import { DeleteResult, Repository } from 'typeorm';
+import { DeleteResult, In, Repository } from 'typeorm';
 import { CreateProductDto } from '@/product/dto/create-product.dto';
 import { CategoryService } from '@/category/category.service';
 import { UpdateProductDto } from '@/product/dto/update-product.dto';
@@ -16,6 +20,16 @@ export class ProductService {
 
   async findAllProducts(): Promise<ProductEntity[]> {
     return this.productRepository.find();
+  }
+
+  async findAllProductsById(productId?: number[]): Promise<ProductEntity[]> {
+    if (!productId || productId.length === 0) {
+      throw new BadRequestException('productId must be a non-empty array');
+    }
+    return this.productRepository.find({
+      where: productId ? { id: In(productId) } : {},
+      relations: { category: true },
+    });
   }
 
   async createProduct(
