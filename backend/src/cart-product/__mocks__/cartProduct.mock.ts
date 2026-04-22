@@ -4,9 +4,9 @@ import { productEntityMock } from '@/product/__mocks__/product.mock';
 
 export const cartProductEntityMock: CartProductEntity = {
   id: 9999999,
-  cartId: cartEntityMock.id,
+  cartId: 9999999,
   productId: productEntityMock.id,
-  amount: 1,
+  amount: 2,
   created_at: new Date(),
   updated_at: new Date(),
 };
