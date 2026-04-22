@@ -30,7 +30,7 @@ describe('CategoryService', () => {
             countProdutsByCategoryId: jest.fn().mockResolvedValue([
               {
                 category_id: categoryEntityMock.id,
-                total: 5, // ✅ CORRETO (não "count")
+                total: 5,
               },
             ]),
           },

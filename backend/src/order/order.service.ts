@@ -142,4 +142,12 @@ export class OrderService {
       },
     });
   }
+
+  async findAllOrders(): Promise<OrderEntity[]> {
+    return this.orderRepository.find({
+      relations: {
+        user: true,
+      },
+    });
+  }
 }

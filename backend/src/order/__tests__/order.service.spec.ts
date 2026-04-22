@@ -19,7 +19,7 @@ import { userEntityMock } from '@/user/__mocks__/user.mock';
 
 describe('OrderService', () => {
   let service: OrderService;
-  let repository: Repository<OrderEntity>;
+  let orderRepository: Repository<OrderEntity>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -70,7 +70,7 @@ describe('OrderService', () => {
     }).compile();
 
     service = module.get<OrderService>(OrderService);
-    repository = module.get(getRepositoryToken(OrderEntity));
+    orderRepository = module.get(getRepositoryToken(OrderEntity));
   });
 
   afterEach(() => {
@@ -79,7 +79,7 @@ describe('OrderService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
-    expect(repository).toBeDefined();
+    expect(orderRepository).toBeDefined();
   });
 
   /* =======================
@@ -93,7 +93,7 @@ describe('OrderService', () => {
     );
 
     expect(result).toEqual(orderEntityMock);
-    expect(repository.save).toHaveBeenCalledTimes(1);
+    expect(orderRepository.save).toHaveBeenCalledTimes(1);
   });
 
   it('should throw if cart not found', async () => {
@@ -118,10 +118,6 @@ describe('OrderService', () => {
     );
   });
 
-  /* =======================
-     SAVE ORDER
-  ======================= */
-
   it('should save order', async () => {
     const result = await service.saveOrder(
       createOrderMock,
@@ -129,7 +125,7 @@ describe('OrderService', () => {
       paymentEntityMock,
     );
 
-    expect(repository.save).toHaveBeenCalled();
+    expect(orderRepository.save).toHaveBeenCalled();
     expect(result).toEqual(orderEntityMock);
   });
 
@@ -162,11 +158,37 @@ describe('OrderService', () => {
   it('should find orders by userId', async () => {
     const result = await service.findOrdersByUserId(userEntityMock.id);
 
-    expect(repository.find).toHaveBeenCalledWith({
+    expect(orderRepository.find).toHaveBeenCalledWith({
       where: { userId: userEntityMock.id },
       relations: expect.any(Object),
     });
 
     expect(result).toEqual([orderEntityMock]);
+  });
+
+  it('should return all orders with user relation', async () => {
+    const orderMock = [
+      {
+        id: 1,
+        total: 100,
+        date: new Date(),
+        user: {
+          id: 1,
+          name: 'User Mock',
+        },
+      },
+    ] as any; // <- evita erro de tipo do OrderEntity
+
+    jest.spyOn(orderRepository, 'find').mockResolvedValueOnce(orderMock);
+
+    const result = await service.findAllOrders();
+
+    expect(orderRepository.find).toHaveBeenCalledWith({
+      relations: {
+        user: true,
+      },
+    });
+
+    expect(result).toEqual(orderMock);
   });
 });

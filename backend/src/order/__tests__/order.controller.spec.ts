@@ -17,6 +17,7 @@ describe('OrderController', () => {
           useValue: {
             createOrder: jest.fn().mockResolvedValue(orderEntityMock),
             findOrdersByUserId: jest.fn().mockResolvedValue([orderEntityMock]),
+            findAllOrders: jest.fn(),
           },
         },
       ],
@@ -35,10 +36,6 @@ describe('OrderController', () => {
     expect(orderService).toBeDefined();
   });
 
-  /* =======================
-     CREATE ORDER
-  ======================= */
-
   it('should create order', async () => {
     const result = await controller.createOrder(createOrderMock, 1);
 
@@ -46,10 +43,6 @@ describe('OrderController', () => {
 
     expect(result).toEqual(orderEntityMock);
   });
-
-  /* =======================
-     FIND ORDERS
-  ======================= */
 
   it('should return orders by userId', async () => {
     const result = await controller.findOrdersByUserId(1);
@@ -64,5 +57,38 @@ describe('OrderController', () => {
     const result = await controller.findOrdersByUserId(1);
 
     expect(result).toEqual([]);
+  });
+
+  it('should return all orders mapped to ReturnOrderDto', async () => {
+    const orderMock = [
+      {
+        id: 1,
+        date: new Date(),
+        user: {
+          id: 1,
+          name: 'User Mock',
+        },
+      },
+    ];
+
+    const serviceResultMock = orderMock as any;
+
+    (orderService.findAllOrders as jest.Mock).mockResolvedValueOnce(
+      serviceResultMock,
+    );
+
+    const result = await controller.findAllOrders();
+
+    expect(orderService.findAllOrders).toHaveBeenCalled();
+
+    expect(result).toEqual([
+      expect.objectContaining({
+        id: 1,
+        user: expect.objectContaining({
+          id: 1,
+          name: 'User Mock',
+        }),
+      }),
+    ]);
   });
 });
