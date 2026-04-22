@@ -19,7 +19,7 @@ export class ProductService {
   ) {}
 
   async findAllProducts(): Promise<ProductEntity[]> {
-    return this.productRepository.find();
+    return this.productRepository.find({ relations: { category: true } });
   }
 
   async findAllProductsById(productId?: number[]): Promise<ProductEntity[]> {
