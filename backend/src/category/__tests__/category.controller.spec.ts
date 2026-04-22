@@ -3,7 +3,6 @@ import { CategoryController } from '@/category/category.controller';
 import { CategoryService } from '@/category/category.service';
 import { categoryEntityMock } from '@/category/__mocks__/category.mock';
 import { createCategoryMock } from '@/category/__mocks__/createCategory.mock';
-import { ReturnCategoryDto } from '@/category/dto/return-category.dto';
 
 describe('CategoryController', () => {
   let controller: CategoryController;
@@ -42,7 +41,8 @@ describe('CategoryController', () => {
 
     expect(categoryService.findAllCategories).toHaveBeenCalled();
 
-    expect(result).toEqual([new ReturnCategoryDto(categoryEntityMock)]);
+    // ✅ agora está correto (ARRAY)
+    expect(result).toEqual([categoryEntityMock]);
   });
 
   it('should throw error when service fails on findAllCategories', async () => {
@@ -68,8 +68,8 @@ describe('CategoryController', () => {
       .spyOn(categoryService, 'createCategory')
       .mockRejectedValueOnce(new Error('error'));
 
-    await expect(
-      controller.createCategory(createCategoryMock),
-    ).rejects.toThrow();
+    await expect(controller.createCategory(createCategoryMock)).rejects.toThrow(
+      'error',
+    );
   });
 });
