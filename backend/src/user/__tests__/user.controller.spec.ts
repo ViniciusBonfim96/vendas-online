@@ -71,20 +71,23 @@ describe('UserController', () => {
     await expect(controller.createUser(createUserMock)).rejects.toThrow();
   });
 
-  it('should return user by id', async () => {
-    const result = await controller.getUserById(1);
+  it('should return all users', async () => {
+    jest
+      .spyOn(userService, 'getAllUser')
+      .mockResolvedValueOnce([userEntityMock]);
 
-    expect(userService.getUserByIdUsingRelations).toHaveBeenCalledWith(1);
+    const result = await controller.getUserById();
 
-    expect(result).toEqual(new ReturnUserDto(userEntityMock));
+    expect(userService.getAllUser).toHaveBeenCalledTimes(1);
+    expect(result).toEqual([userEntityMock]);
   });
 
-  it('should throw error when service fails on getUserById', async () => {
+  it('should throw error when service fails on getAllUser', async () => {
     jest
-      .spyOn(userService, 'getUserByIdUsingRelations')
+      .spyOn(userService, 'getAllUser')
       .mockRejectedValueOnce(new Error('error'));
 
-    await expect(controller.getUserById(1)).rejects.toThrow();
+    await expect(controller.getUserById()).rejects.toThrow();
   });
 
   it('should update password', async () => {
@@ -106,5 +109,24 @@ describe('UserController', () => {
     await expect(
       controller.updatePasswordUser(updatePasswordMock, 1),
     ).rejects.toThrow();
+  });
+
+  it('should return user info', async () => {
+    const result = await controller.getInfoUser(1);
+
+    expect(userService.getUserByIdUsingRelations).toHaveBeenCalledWith(1);
+    expect(result).toEqual(new ReturnUserDto(userEntityMock));
+  });
+
+  it('should call service once', async () => {
+    await controller.getInfoUser(1);
+
+    expect(userService.getUserByIdUsingRelations).toHaveBeenCalledTimes(1);
+  });
+
+  it('should return instance of ReturnUserDto', async () => {
+    const result = await controller.getInfoUser(1);
+
+    expect(result).toBeInstanceOf(ReturnUserDto);
   });
 });
