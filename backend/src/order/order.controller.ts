@@ -2,6 +2,9 @@ import {
   Body,
   Controller,
   Get,
+  NotFoundException,
+  Param,
+  ParseIntPipe,
   Post,
   UsePipes,
   ValidationPipe,
@@ -39,5 +42,19 @@ export class OrderController {
     return (await this.orderService.findAllOrders()).map(
       (order) => new ReturnOrderDto(order),
     );
+  }
+
+  @Roles(UserType.Admin)
+  @Get('/:orderId')
+  async findOrderById(
+    @Param('orderId', ParseIntPipe) orderId: number,
+  ): Promise<ReturnOrderDto> {
+    const order = await this.orderService.findOrderById(orderId);
+
+    if (!order) {
+      throw new NotFoundException(`orderId: ${orderId} not found`);
+    }
+
+    return new ReturnOrderDto(order);
   }
 }

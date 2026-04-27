@@ -16,6 +16,7 @@ import { ProductService } from '@/product/product.service';
 import { CartEntity } from '@/cart/entity/cart.entity';
 import { ProductEntity } from '@/product/entity/product.entity';
 import { OrderProductEntity } from '@/order-product/entity/orderProduct.entity';
+import { promises } from 'dns';
 
 @Injectable()
 export class OrderService {
@@ -147,6 +148,21 @@ export class OrderService {
     return this.orderRepository.find({
       relations: {
         user: true,
+      },
+    });
+  }
+
+  async findOrderById(orderId: number): Promise<OrderEntity | null> {
+    return this.orderRepository.findOne({
+      where: { id: orderId },
+      relations: {
+        address: true,
+        ordersProduct: {
+          product: true,
+        },
+        payment: {
+          paymentStatus: true,
+        },
       },
     });
   }

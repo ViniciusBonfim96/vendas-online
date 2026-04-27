@@ -30,6 +30,7 @@ describe('OrderService', () => {
           useValue: {
             save: jest.fn().mockResolvedValue(orderEntityMock),
             find: jest.fn().mockResolvedValue([orderEntityMock]),
+            findOne: jest.fn().mockResolvedValue(orderEntityMock),
           },
         },
         {
@@ -81,10 +82,6 @@ describe('OrderService', () => {
     expect(service).toBeDefined();
     expect(orderRepository).toBeDefined();
   });
-
-  /* =======================
-     CREATE ORDER
-  ======================= */
 
   it('should create order successfully', async () => {
     const result = await service.createOrder(
@@ -177,7 +174,7 @@ describe('OrderService', () => {
           name: 'User Mock',
         },
       },
-    ] as any; // <- evita erro de tipo do OrderEntity
+    ] as any;
 
     jest.spyOn(orderRepository, 'find').mockResolvedValueOnce(orderMock);
 
@@ -190,5 +187,70 @@ describe('OrderService', () => {
     });
 
     expect(result).toEqual(orderMock);
+  });
+
+  describe('findOrderById', () => {
+    it('should return order with relations', async () => {
+      const result = await service.findOrderById(orderEntityMock.id);
+
+      expect(orderRepository.findOne).toHaveBeenCalledWith({
+        where: { id: orderEntityMock.id },
+        relations: {
+          address: true,
+          ordersProduct: {
+            product: true,
+          },
+          payment: {
+            paymentStatus: true,
+          },
+        },
+      });
+
+      expect(result).toEqual(orderEntityMock);
+    });
+
+    it('should return null when order not found', async () => {
+      jest.spyOn(orderRepository, 'findOne').mockResolvedValueOnce(null);
+
+      const result = await service.findOrderById(orderEntityMock.id);
+
+      expect(orderRepository.findOne).toHaveBeenCalledWith({
+        where: { id: orderEntityMock.id },
+        relations: {
+          address: true,
+          ordersProduct: {
+            product: true,
+          },
+          payment: {
+            paymentStatus: true,
+          },
+        },
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('should throw error when repository fails', async () => {
+      jest
+        .spyOn(orderRepository, 'findOne')
+        .mockRejectedValueOnce(new Error('DB error'));
+
+      await expect(service.findOrderById(orderEntityMock.id)).rejects.toThrow(
+        'DB error',
+      );
+
+      expect(orderRepository.findOne).toHaveBeenCalledWith({
+        where: { id: orderEntityMock.id },
+        relations: {
+          address: true,
+          ordersProduct: {
+            product: true,
+          },
+          payment: {
+            paymentStatus: true,
+          },
+        },
+      });
+    });
   });
 });

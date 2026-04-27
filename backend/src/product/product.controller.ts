@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   UsePipes,
@@ -42,7 +43,7 @@ export class ProductController {
   @Roles(UserType.Admin)
   @Delete('/:productId')
   async deleteProduct(
-    @Param('productId') productId: number,
+    @Param('productId', ParseIntPipe) productId: number,
   ): Promise<DeleteResult> {
     return this.productService.deleteProduct(productId);
   }
@@ -52,7 +53,7 @@ export class ProductController {
   @Put('/:productId')
   async updateProduct(
     @Body() updateProduct: UpdateProductDto,
-    @Param('productId') productId: number,
+    @Param('productId', ParseIntPipe) productId: number,
   ): Promise<ProductEntity> {
     return this.productService.updateProduct(updateProduct, productId);
   }

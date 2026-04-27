@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrderController } from '@/order/order.controller';
 import { OrderService } from '@/order/order.service';
-import { orderEntityMock } from '../__mocks__/order.mock';
-import { createOrderMock } from '../__mocks__/createOrder.mock';
+import { orderEntityMock } from '@/order/__mocks__/order.mock';
+import { createOrderMock } from '@/order/__mocks__/createOrder.mock';
+import { ReturnOrderDto } from '@/order/dto/returnOrder.dto';
 
 describe('OrderController', () => {
   let controller: OrderController;
@@ -17,6 +18,7 @@ describe('OrderController', () => {
           useValue: {
             createOrder: jest.fn().mockResolvedValue(orderEntityMock),
             findOrdersByUserId: jest.fn().mockResolvedValue([orderEntityMock]),
+            findOrderById: jest.fn().mockResolvedValue(orderEntityMock),
             findAllOrders: jest.fn(),
           },
         },
@@ -90,5 +92,43 @@ describe('OrderController', () => {
         }),
       }),
     ]);
+  });
+
+  describe('findOrderById', () => {
+    it('should return order by id', async () => {
+      const result = await controller.findOrderById(orderEntityMock.id);
+
+      expect(orderService.findOrderById).toHaveBeenCalledWith(
+        orderEntityMock.id,
+      );
+
+      expect(result).toEqual(new ReturnOrderDto(orderEntityMock));
+    });
+
+    it('should throw NotFoundException when order not found', async () => {
+      jest.spyOn(orderService, 'findOrderById').mockResolvedValueOnce(null);
+
+      await expect(
+        controller.findOrderById(orderEntityMock.id),
+      ).rejects.toThrow(`orderId: ${orderEntityMock.id} not found`);
+
+      expect(orderService.findOrderById).toHaveBeenCalledWith(
+        orderEntityMock.id,
+      );
+    });
+
+    it('should throw error when service fails', async () => {
+      jest
+        .spyOn(orderService, 'findOrderById')
+        .mockRejectedValueOnce(new Error('DB error'));
+
+      await expect(
+        controller.findOrderById(orderEntityMock.id),
+      ).rejects.toThrow('DB error');
+
+      expect(orderService.findOrderById).toHaveBeenCalledWith(
+        orderEntityMock.id,
+      );
+    });
   });
 });

@@ -7,6 +7,7 @@ import {
   Get,
   NotFoundException,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   UsePipes,
@@ -55,7 +56,7 @@ export class CartController {
 
   @Delete('/product/:productId')
   async deleteProductCart(
-    @Param('productId') productId: number,
+    @Param('productId', ParseIntPipe) productId: number,
     @UserId() userId: number,
   ): Promise<DeleteResult> {
     return this.cartService.deleteProductCart(productId, userId);
