@@ -145,10 +145,33 @@ export class OrderService {
   }
 
   async findAllOrders(): Promise<OrderEntity[]> {
-    return this.orderRepository.find({
+    const orders = await this.orderRepository.find({
       relations: {
         user: true,
+        address: true,
+        payment: true,
+        ordersProduct: {
+          product: true,
+        },
       },
+    });
+
+    const ordersProduct =
+      await this.orderProductService.findAmountProductsByOrderId(
+        orders.map((order) => order.id),
+      );
+
+    return orders.map((order) => {
+      const orderProduct = ordersProduct.find(
+        (currentOrder) => currentOrder.order_id === order.id,
+      );
+      if (orderProduct) {
+        return {
+          ...order,
+          amountProducts: Number(orderProduct.total),
+        };
+      }
+      return order;
     });
   }
 

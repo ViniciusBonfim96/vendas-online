@@ -7,14 +7,21 @@ import { OrderProductEntity } from '@/order-product/entity/orderProduct.entity';
 export class ReturnOrderDto {
   id: number;
   date: string;
+  userId: number;
+  addressId: number;
+  paymentId: number;
   user?: ReturnUserDto;
   address?: ReturnAddressDto;
   payment?: ReturnPaymentDto;
   ordersProduct?: OrderProductEntity[];
+  amountProducts?: number;
 
   constructor(order: OrderEntity) {
     this.id = order.id;
     this.date = order.date.toString();
+    this.userId = order?.userId;
+    this.addressId = order?.addressId;
+    this.paymentId = order?.paymentId;
     this.user = order.user ? new ReturnUserDto(order.user) : undefined;
     this.address = order.address
       ? new ReturnAddressDto(order.address)
@@ -23,5 +30,6 @@ export class ReturnOrderDto {
       ? new ReturnPaymentDto(order.payment)
       : undefined;
     this.ordersProduct = order.ordersProduct;
+    this.amountProducts = order.amountProducts;
   }
 }

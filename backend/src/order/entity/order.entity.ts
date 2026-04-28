@@ -52,7 +52,7 @@ export class OrderEntity {
   })
   updated_at!: Date;
 
-  @ManyToMany(() => UserEntity, (user) => user.orders)
+  @ManyToOne(() => UserEntity, (user) => user.orders)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user?: UserEntity;
 
@@ -66,4 +66,6 @@ export class OrderEntity {
 
   @OneToMany(() => OrderProductEntity, (orderProduct) => orderProduct.order)
   ordersProduct?: OrderProductEntity[];
+
+  amountProducts?: number;
 }

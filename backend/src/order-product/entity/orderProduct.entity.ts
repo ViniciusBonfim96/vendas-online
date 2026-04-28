@@ -50,4 +50,6 @@ export class OrderProductEntity {
   @ManyToOne(() => ProductEntity, (product) => product.ordersProduct)
   @JoinColumn({ name: 'product_id', referencedColumnName: 'id' })
   product?: ProductEntity;
+
+  amountProducts?: number;
 }

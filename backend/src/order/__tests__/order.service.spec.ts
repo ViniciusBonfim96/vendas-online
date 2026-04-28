@@ -49,6 +49,7 @@ describe('OrderService', () => {
           provide: OrderProductService,
           useValue: {
             createOrderProduct: jest.fn().mockResolvedValue({}),
+            findAmountProductsByOrderId: jest.fn(),
           },
         },
         {
@@ -167,7 +168,6 @@ describe('OrderService', () => {
     const orderMock = [
       {
         id: 1,
-        total: 100,
         date: new Date(),
         user: {
           id: 1,
@@ -178,15 +178,31 @@ describe('OrderService', () => {
 
     jest.spyOn(orderRepository, 'find').mockResolvedValueOnce(orderMock);
 
+    const orderProductService = service['orderProductService'];
+
+    jest
+      .spyOn(orderProductService, 'findAmountProductsByOrderId')
+      .mockResolvedValue([{ order_id: 1, total: '3' }]);
+
     const result = await service.findAllOrders();
 
     expect(orderRepository.find).toHaveBeenCalledWith({
       relations: {
         user: true,
+        address: true,
+        payment: true,
+        ordersProduct: {
+          product: true,
+        },
       },
     });
 
-    expect(result).toEqual(orderMock);
+    expect(result).toEqual([
+      {
+        ...orderMock[0],
+        amountProducts: 3,
+      },
+    ]);
   });
 
   describe('findOrderById', () => {
