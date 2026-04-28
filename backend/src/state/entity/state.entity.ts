@@ -16,6 +16,9 @@ export class StateEntity {
   @Column({ name: 'name', type: 'varchar', length: 255, nullable: false })
   name!: string;
 
+  @Column({ name: 'uf', type: 'varchar', length: 255, nullable: false })
+  uf!: string;
+
   @CreateDateColumn({
     name: 'created_at',
     type: 'timestamp',

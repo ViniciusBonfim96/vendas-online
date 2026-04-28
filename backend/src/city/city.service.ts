@@ -29,4 +29,22 @@ export class CityService {
 
     return city;
   }
+
+  async findCityByName(
+    nameCity: string,
+    nameState: string,
+  ): Promise<CityEntity | null> {
+    const city = await this.cityRepository.findOne({
+      where: {
+        name: nameCity,
+        state: {
+          uf: nameState,
+        },
+      },
+      relations: {
+        state: true,
+      },
+    });
+    return city;
+  }
 }
