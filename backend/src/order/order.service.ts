@@ -148,8 +148,14 @@ export class OrderService {
     const orders = await this.orderRepository.find({
       relations: {
         user: true,
-        address: true,
-        payment: true,
+        address: {
+          city: {
+            state: true,
+          },
+        },
+        payment: {
+          paymentStatus: true,
+        },
         ordersProduct: {
           product: true,
         },
@@ -179,12 +185,17 @@ export class OrderService {
     return this.orderRepository.findOne({
       where: { id: orderId },
       relations: {
-        address: true,
-        ordersProduct: {
-          product: true,
+        user: true,
+        address: {
+          city: {
+            state: true,
+          },
         },
         payment: {
           paymentStatus: true,
+        },
+        ordersProduct: {
+          product: true,
         },
       },
     });

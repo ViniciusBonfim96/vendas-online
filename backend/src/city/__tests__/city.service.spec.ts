@@ -99,4 +99,65 @@ describe('CityService', () => {
     expect(cityRepository.find).not.toHaveBeenCalled();
     expect(city).toEqual([cityEntityMock]);
   });
+
+  it('should return city when found', async () => {
+    const cityMock = {
+      id: 1,
+      name: 'Belo Horizonte',
+      state: {
+        id: 1,
+        uf: 'MG',
+      },
+    } as any;
+
+    jest.spyOn(cityRepository, 'findOne').mockResolvedValueOnce(cityMock);
+
+    const result = await service.findCityByName('Belo Horizonte', 'MG');
+
+    expect(cityRepository.findOne).toHaveBeenCalledWith({
+      where: {
+        name: 'Belo Horizonte',
+        state: {
+          uf: 'MG',
+        },
+      },
+      relations: {
+        state: true,
+      },
+    });
+
+    expect(result).toEqual(cityMock);
+  });
+
+  it('should return null when city not found', async () => {
+    jest.spyOn(cityRepository, 'findOne').mockResolvedValueOnce(null);
+
+    const result = await service.findCityByName('Cidade Inexistente', 'XX');
+
+    expect(cityRepository.findOne).toHaveBeenCalledWith({
+      where: {
+        name: 'Cidade Inexistente',
+        state: {
+          uf: 'XX',
+        },
+      },
+      relations: {
+        state: true,
+      },
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it('should throw error when repository fails', async () => {
+    jest
+      .spyOn(cityRepository, 'findOne')
+      .mockRejectedValueOnce(new Error('DB error'));
+
+    await expect(service.findCityByName('São Paulo', 'SP')).rejects.toThrow(
+      'DB error',
+    );
+
+    expect(cityRepository.findOne).toHaveBeenCalled();
+  });
 });

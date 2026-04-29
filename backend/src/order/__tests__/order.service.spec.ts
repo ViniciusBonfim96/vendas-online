@@ -189,8 +189,14 @@ describe('OrderService', () => {
     expect(orderRepository.find).toHaveBeenCalledWith({
       relations: {
         user: true,
-        address: true,
-        payment: true,
+        address: {
+          city: {
+            state: true,
+          },
+        },
+        payment: {
+          paymentStatus: true,
+        },
         ordersProduct: {
           product: true,
         },
@@ -212,12 +218,17 @@ describe('OrderService', () => {
       expect(orderRepository.findOne).toHaveBeenCalledWith({
         where: { id: orderEntityMock.id },
         relations: {
-          address: true,
-          ordersProduct: {
-            product: true,
+          user: true,
+          address: {
+            city: {
+              state: true,
+            },
           },
           payment: {
             paymentStatus: true,
+          },
+          ordersProduct: {
+            product: true,
           },
         },
       });
@@ -233,12 +244,17 @@ describe('OrderService', () => {
       expect(orderRepository.findOne).toHaveBeenCalledWith({
         where: { id: orderEntityMock.id },
         relations: {
-          address: true,
-          ordersProduct: {
-            product: true,
+          user: true,
+          address: {
+            city: {
+              state: true,
+            },
           },
           payment: {
             paymentStatus: true,
+          },
+          ordersProduct: {
+            product: true,
           },
         },
       });
@@ -258,12 +274,17 @@ describe('OrderService', () => {
       expect(orderRepository.findOne).toHaveBeenCalledWith({
         where: { id: orderEntityMock.id },
         relations: {
-          address: true,
-          ordersProduct: {
-            product: true,
+          user: true,
+          address: {
+            city: {
+              state: true,
+            },
           },
           payment: {
             paymentStatus: true,
+          },
+          ordersProduct: {
+            product: true,
           },
         },
       });
