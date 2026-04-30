@@ -18,6 +18,7 @@ import { PaymentModule } from './payment/payment.module';
 import { OrderModule } from './order/order.module';
 import { OrderProductModule } from './order-product/order-product.module';
 import { CorreiosModule } from './correios/correios.module';
+import { MelhorEnvioModule } from './melhor-envio/melhor-envio.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { CorreiosModule } from './correios/correios.module';
     OrderModule,
     OrderProductModule,
     CorreiosModule,
+    MelhorEnvioModule,
   ],
   controllers: [],
   providers: [
